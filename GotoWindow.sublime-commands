@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "GotoWindow: Switch Window",
+        "command": "goto_window"
+    }
+]
