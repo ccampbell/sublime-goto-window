@@ -6,7 +6,7 @@ in them and you want to switch without having to press `command ~` over and over
 
 ## To Install
 
-If you are using Sublime Package Control you can press ``command+shift+p``.  Then select ``Package Control: Install Package`` and choose ``Goto Window``.
+If you are using Sublime Package Control you can press ``command+shift+p``.  Then select ``Package Control: Install Package`` and choose ``GotoWindow``.
 
 Another option is running the following command (this is the OS X version):
 
