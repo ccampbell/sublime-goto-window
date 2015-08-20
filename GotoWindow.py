@@ -13,7 +13,7 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         for folder in folders_alone:
             folders_for_list.append([os.path.basename(folder), folder])
 
-        self.window.show_quick_panel(folders_for_list, self.on_done, 0, -1, None)
+        self.window.show_quick_panel(folders_for_list, self.on_done, 0)
 
     def on_done(self, selected_index):
         current_index = self._get_current_index()
@@ -24,18 +24,13 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         window_index = folders[selected_index][1]
         window_to_move_to = sublime.windows()[window_index]
 
-        active_view = window_to_move_to.active_view()
-
-        # This hack is needed to make this work on Windows
-        window_to_move_to.focus_view(active_view)
-        window_to_move_to.run_command('focus_neighboring_group')
-        window_to_move_to.focus_view(active_view)
+        self.focus(window_to_move_to)
 
         # Hack needed for OS X due to this bug
         # https://github.com/SublimeTextIssues/Core/issues/444
         if sublime.platform() == 'osx':
             name = 'Sublime Text'
-            if sublime.version().startswith('2.'):
+            if int(sublime.version()) < 3000:
                 name = 'Sublime Text 2'
 
             # This is some magic. I spent many many hours trying to find a
@@ -55,6 +50,27 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
                 end tell""" % name
 
             Popen(['/usr/bin/osascript', "-e", cmd], stdout=PIPE, stderr=PIPE)
+
+    def focus(self, window_to_move_to):
+        active_view = window_to_move_to.active_view()
+        active_group = window_to_move_to.active_group()
+
+        # In Sublime Text 2 if a folder has no open files in it the active view
+        # will return None. This tries to use the actives view and falls back
+        # to using the active group
+
+        # Calling focus then the command then focus again is needed to make this
+        # work on Windows
+        if active_view is not None:
+            window_to_move_to.focus_view(active_view)
+            window_to_move_to.run_command('focus_neighboring_group')
+            window_to_move_to.focus_view(active_view)
+            return
+
+        if active_group is not None:
+            window_to_move_to.focus_group(active_group)
+            window_to_move_to.run_command('focus_neighboring_group')
+            window_to_move_to.focus_group(active_group)
 
     def _get_current_index(self):
         active_window = sublime.active_window()
