@@ -36,5 +36,5 @@ There is a bug that prevents this from actually working natively using Sublime
 Text.  See https://github.com/SublimeTextIssues/Core/issues/444 for more
 information.
 
-I haven't been able to test it on Windows, but I put in a workaround that seems
-to work on OS X.
+I haven't been able to test it on Windows, but there are workarounds in place
+that seem to work on OS X and Linux.
