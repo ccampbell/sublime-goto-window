@@ -15,6 +15,11 @@ cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages
 git clone git@github.com:ccampbell/sublime-goto-window.git GotoWindow
 ```
 
+### Linux dependencies
+
+This plugin depends on `wmctrl` being installed on your system. On Debian-based
+operating systems (such as Ubuntu), you can get it using `apt-get install wmctrl`.
+
 ## Usage
 
 The default keybinding is

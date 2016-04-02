@@ -88,8 +88,14 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         elif 'folder' in window_variables:
             window_title = os.path.basename(window_variables['folder'])
 
-        Popen(["wmctrl", "-a", window_title + ") - Sublime Text"],
-                stdout=PIPE, stderr=PIPE)
+        try:
+            Popen(["wmctrl", "-a", window_title + ") - Sublime Text"],
+                    stdout=PIPE, stderr=PIPE)
+        except FileNotFoundError:
+            msg = "`wmctrl` is required by GotoWindow but was not found on " \
+                  "your system. Please install it and try again."
+            sublime.error_message(msg)
+
 
     def _get_current_index(self):
         active_window = sublime.active_window()
