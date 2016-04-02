@@ -15,6 +15,11 @@ cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages
 git clone git@github.com:ccampbell/sublime-goto-window.git GotoWindow
 ```
 
+### Linux dependencies
+
+This plugin depends on `wmctrl` being installed on your system. On Debian-based
+operating systems (such as Ubuntu), you can get it using `apt-get install wmctrl`.
+
 ## Usage
 
 The default keybinding is
@@ -36,5 +41,5 @@ There is a bug that prevents this from actually working natively using Sublime
 Text.  See https://github.com/SublimeTextIssues/Core/issues/444 for more
 information.
 
-I haven't been able to test it on Windows, but I put in a workaround that seems
-to work on OS X.
+I haven't been able to test it on Windows, but there are workarounds in place
+that seem to work on OS X and Linux.
