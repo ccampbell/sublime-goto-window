@@ -108,14 +108,46 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
 
         return current_index
 
+    def _smart_path(self, name):
+        home = os.getenv('HOME')
+        if name.startswith(home):
+            name = name.replace(home, '~')
+
+        return name
+
+    def _get_display_name(self, window):
+        # If we have a sublime-project file in the window then use that to
+        # represent the window
+
+        # Sublime Text 2 does not have this method
+        if hasattr(window, 'project_file_name'):
+            project_file_name = window.project_file_name()
+            if project_file_name is not None:
+                project_file_name = project_file_name.replace('.sublime-project', '')
+                return project_file_name
+
+        folders_in_window = window.folders()
+        active_view = window.active_view()
+
+        # Otherwise if there are no folders then use the active_view
+        if len(folders_in_window) == 0 and active_view is not None:
+            view_path = active_view.file_name()
+            if view_path:
+                return view_path
+
+            view_name = active_view.name()
+            if view_name:
+                return view_name
+
+        # Otherwise use the first folder we find
+        for folder in window.folders():
+            return folder
+
     def _get_folders(self):
         folders = []
-        home = os.getenv('HOME')
         for i, window in enumerate(sublime.windows()):
-            for folder in window.folders():
-                if folder.startswith(home):
-                    folder = folder.replace(home, '~')
-
-                folders.append((folder, i))
+            display_name = self._get_display_name(window)
+            if display_name is not None:
+                folders.append((self._smart_path(display_name), i))
 
         return sorted(folders)
