@@ -110,7 +110,7 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
 
     def _smart_path(self, name):
         home = os.getenv('HOME')
-        if name.startswith(home):
+        if home is not None and name.startswith(home):
             name = name.replace(home, '~')
 
         return name
