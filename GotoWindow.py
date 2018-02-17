@@ -1,7 +1,35 @@
+import ctypes
 import os
 import sublime
 import sublime_plugin
 from subprocess import Popen, PIPE
+
+
+class RECT(ctypes.Structure):
+    _fields_ = [
+        ('left', ctypes.c_long),
+        ('top', ctypes.c_long),
+        ('right', ctypes.c_long),
+        ('bottom', ctypes.c_long),
+    ]
+
+
+class POINT(ctypes.Structure):
+    _fields_ = [
+        ('x', ctypes.c_long),
+        ('y', ctypes.c_long)
+    ]
+
+
+class WINDOWPLACEMENT(ctypes.Structure):
+    _fields_ = [
+        ('length', ctypes.c_uint),
+        ('flags', ctypes.c_uint),
+        ('showCmd', ctypes.c_uint),
+        ('ptMinPosition', POINT),
+        ('ptMaxPosition', POINT),
+        ('rcNormalPosition', RECT),
+    ]
 
 
 class GotoWindowCommand(sublime_plugin.WindowCommand):
@@ -23,6 +51,9 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         folders = self._get_folders()
         window_index = folders[selected_index][1]
         window_to_move_to = sublime.windows()[window_index]
+
+        if sublime.platform() == 'windows':
+            self._win_restore(window_to_move_to)
 
         self.focus(window_to_move_to)
 
@@ -96,6 +127,15 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
                   "your system. Please install it and try again."
             sublime.error_message(msg)
 
+    def _win_restore(self, window):
+        wp = WINDOWPLACEMENT(length=ctypes.sizeof(WINDOWPLACEMENT))
+        ctypes.windll.user32.GetWindowPlacement(window.hwnd(), ctypes.byref(wp))
+        # 1 == normal (SW_SHOWNORMAL)
+        # 2 == minimized (SW_SHOWMINIMIZED)
+        # 3 == maximized (SW_SHOWMAXIMIZED)
+        if wp.showCmd == 2:
+            # 9 == SW_RESTORE
+            ctypes.windll.user32.ShowWindowAsync(window.hwnd(), 9)
 
     def _get_current_index(self):
         active_window = sublime.active_window()
