@@ -1,0 +1,11 @@
+{
+    // Changing this to true may make switching windows on MacOS a bit faster.
+    // See https://github.com/ccampbell/sublime-goto-window/issues/14 for more
+    // information.
+    //
+    // This setting requires that you
+    //
+    // 1. Go into System Preferences -> Security & Privacy -> Accessibility
+    // 2. Add Sublime Text to the list of apps and make sure it is checked
+    "mac_experimental_switching": false
+}

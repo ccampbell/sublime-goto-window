@@ -6,6 +6,10 @@ from subprocess import Popen, PIPE
 
 class GotoWindowCommand(sublime_plugin.WindowCommand):
     def run(self):
+        self.mac_experimental_switching = sublime.load_settings(
+            'GoToWindow.sublime-settings').get('mac_experimental_switching',
+            False)
+
         folders = self._get_folders()
 
         folders_alone = [x for (x, y) in folders]
@@ -30,7 +34,7 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         # due to this bug:
         # https://github.com/SublimeTextIssues/Core/issues/444
         if sublime.platform() == 'osx':
-            self._osx_focus()
+            self._osx_focus(window_to_move_to)
         elif sublime.platform() == 'linux':
             self._linux_focus(window_to_move_to)
 
@@ -55,7 +59,21 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
             window_to_move_to.run_command('focus_neighboring_group')
             window_to_move_to.focus_group(active_group)
 
-    def _osx_focus(self):
+    def _osx_window_title(self, window_to_move_to):
+        window_variables = window_to_move_to.extract_variables()
+        title = 'untitled'
+        if 'file_name' in window_variables:
+            title = window_variables['file_name']
+
+        folder = ''
+        if 'project_base_name' in window_variables:
+            title += ' — ' + window_variables['project_base_name']
+        elif 'folder' in window_variables:
+            title += ' — ' + os.path.basename(window_variables['folder'])
+
+        return title
+
+    def _osx_focus(self, window_to_move_to):
         name = 'Sublime Text'
         if int(sublime.version()) < 3000:
             name = 'Sublime Text 2'
@@ -75,6 +93,24 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
                 delay 1/60
                 activate application "%s"
             end tell""" % name
+
+        if self.mac_experimental_switching:
+            window_title = self._osx_window_title(window_to_move_to)
+
+            # This also works and may be more foolproof, but it seems to be
+            # slower to me:
+            #
+            # click (first menu item whose value of attribute
+            # "AXMenuItemMarkChar" is "✓") of menu "Window" of menu bar 1
+            #
+            # This command requires Accessibility permission which you can set
+            # in System Preferences -> Security & Privacy -> Accessibility
+            cmd = """
+            tell application "System Events"
+                tell process "%s"
+                    click (first menu item whose name is "%s") of menu "Window" of menu bar 1
+                end tell
+            end tell""" % (name, window_title)
 
         Popen(['/usr/bin/osascript', "-e", cmd], stdout=PIPE, stderr=PIPE)
 
