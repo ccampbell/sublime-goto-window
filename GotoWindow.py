@@ -98,7 +98,7 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         #
         # See https://github.com/ccampbell/sublime-goto-window/issues/15
         if self.mac_os_version is not None and len(
-            self.mac_os_version) > 0 and self.mac_os_version[0] == '11':
+            self.mac_os_version) > 0 and int(self.mac_os_version[0]) >= 11:
 
             cmd = """
                 tell application "System Events"
