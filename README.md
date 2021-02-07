@@ -38,7 +38,7 @@ Select an item and that's it!
 ## Note
 
 There is a bug that prevents this from actually working natively using Sublime
-Text.  See https://github.com/SublimeTextIssues/Core/issues/444 for more
+Text APIs. See https://github.com/SublimeTextIssues/Core/issues/444 for more
 information.
 
 I haven't been able to test it on Windows, but there are workarounds in place
