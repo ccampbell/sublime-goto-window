@@ -1,11 +1,23 @@
 import os
 import sublime
 import sublime_plugin
+import subprocess
 from subprocess import Popen, PIPE
 
 
 class GotoWindowCommand(sublime_plugin.WindowCommand):
     def run(self):
+        self.mac_os_version = None
+
+        if sublime.platform() == "osx":
+            try:
+                version = subprocess.check_output(['sw_vers', '-productVersion'], stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as e:
+                pass
+            else:
+                version_string = "".join(chr(x) for x in version)
+                self.mac_os_version = version_string.split('.')
+
         folders = self._get_folders()
 
         folders_alone = [x for (x, y) in folders]
@@ -75,6 +87,24 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
                 delay 1/60
                 activate application "%s"
             end tell""" % name
+
+        # For some reason the previous command stopped working on MacOS Big Sur
+        # 11.1. This is a workaround where we try to switch to another
+        # application other than "Dock". For whatever reason the delay no longer
+        # seems to be necessary either.
+        #
+        # I will admit this makes no logical sense, and I have no idea what
+        # even made me try to do this, but it works.
+        #
+        # See https://github.com/ccampbell/sublime-goto-window/issues/15
+        if self.mac_os_version is not None and len(
+            self.mac_os_version) > 0 and self.mac_os_version[0] == '11':
+
+            cmd = """
+                tell application "System Events"
+                    activate application "System Events"
+                    activate application "%s"
+                end tell""" % name
 
         Popen(['/usr/bin/osascript', "-e", cmd], stdout=PIPE, stderr=PIPE)
 
