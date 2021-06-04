@@ -1,0 +1,6 @@
+{
+    // Use to set window name as either 
+    //    "project"   : For project name
+    //    "workspace" : For workspace name
+    "window-name": "project"
+}

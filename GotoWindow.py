@@ -4,6 +4,19 @@ import sublime_plugin
 import subprocess
 from subprocess import Popen, PIPE
 
+def plugin_loaded():
+    user_settings_path = os.path.join(
+        sublime.packages_path(),
+        "User",
+        "goto_window.sublime-settings")
+
+    if not os.path.exists(user_settings_path):
+        default_settings_path = os.path.join(
+            sublime.packages_path(),
+            "GotoWindow",
+            "goto_window.sublime-settings")
+
+        shutil.copyfile(default_settings_path, user_settings_path)
 
 class GotoWindowCommand(sublime_plugin.WindowCommand):
     def run(self):
@@ -146,15 +159,34 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         return name
 
     def _get_display_name(self, window):
+        # Read user settings to choose between project name or workspace name
+        settings = sublime.load_settings("goto_window.sublime-settings")
+        window_name = settings.get("window-name")
+
         # If we have a sublime-project file in the window then use that to
         # represent the window
 
+        # use goto_window.sublime-settings 'window_name'
+        # to determine project vs worksspace name convention
+
         # Sublime Text 2 does not have this method
-        if hasattr(window, 'project_file_name'):
-            project_file_name = window.project_file_name()
-            if project_file_name is not None:
-                project_file_name = project_file_name.replace('.sublime-project', '')
-                return project_file_name
+        if window_name == 'project':
+          if hasattr(window, 'project_file_name'):
+              project_file_name = window.project_file_name()
+              if project_file_name is not None:
+                  project_file_name = project_file_name.replace('.sublime-project', '')
+                  return project_file_name
+
+        # Sublime Text 3 does not have this method
+        elif window_name == 'workspace':
+          if hasattr(window, 'workspace_file_name'):
+              workspace_file_name = window.workspace_file_name()
+              if workspace_file_name is not None:
+                  workspace_file_name = workspace_file_name.replace('.sublime-workspace', '')
+                  return workspace_file_name
+        else:
+          # Raise an error?
+          pass
 
         folders_in_window = window.folders()
         active_view = window.active_view()
