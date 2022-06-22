@@ -102,7 +102,7 @@ class GotoWindowCommand(sublime_plugin.WindowCommand):
         # supported by Applescript.
         cmd = """
             tell application "System Events"
-                activate application "Dock"
+                activate application "Finder"
                 delay 1/60
                 activate application "%s"
             end tell""" % name
